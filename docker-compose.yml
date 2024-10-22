@@ -1,0 +1,44 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: server 
+    ports:
+      - "8443:443"
+    volumes:
+      - ./server/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./tls/server/ssl:/etc/nginx/ssl
+    restart: always
+    networks:
+      - backend
+  squid:
+    image: ubuntu/squid
+    restart: always
+    container_name: squid
+    hostname: squid
+    volumes:
+     - ./proxy/squid.conf:/etc/squid/squid.conf
+    ports:
+     - "3128:3128"
+    networks:
+      - backend
+  gunicorn:
+    ports:
+      - "127.0.0.1:5000:5000"
+    image: simple-flask
+    environment:
+      HTTP_PROXY: "http://squid:3128"
+      HTTPS_PROXY: "http://squid:3128"
+      CLIENT_CERT_PATH: "/ssl/client.crt"
+      CLIENT_KEY_PATH: "/ssl/client.key"
+      CLIENT_CACERT_PATH: "/ssl/ca.crt"
+      REMOTE_ENDPOINT_URL: "https://server"
+    restart: always
+    container_name: gunicorn
+    hostname: gunicorn
+    volumes:
+      - ./tls/client/ssl:/ssl
+    networks:
+      - backend
+
+networks:
+  backend:
