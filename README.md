@@ -1,12 +1,12 @@
 # mtls-with-proxy-poc
 
-PoC setup of simple python HTTP get with SSL certs.
-Simple PoC project to verify the flow of "mTLS" authentication through the "corporate" (e.g. forward) proxy.
+PoC setup of simple python HTTP server that does simple HTTP request against another URL using SSL certs to authenticate itself (e.g. mTLS), but it does that through the SQUID proxy to simulate the most corporate setup one normally doesn't have to deal with, but sometimes he does.
 
 You simply setup 3 components:
-- NGINX with SSL auth
-- SQUID as a transparent proxy
-- GUNICORN as your mTLS sidecard (it will inject the SSL client cert and key so you'll be able to authenticate against the NGINX server)
+- NGINX server with SSL auth required (it just return 200 ok to all requests)
+- SQUID as a transparent HTTP(s) proxy
+- GUNICORN as your mTLS sidecar (it will inject the SSL client cert and key so you'll be able to authenticate against the NGINX server)
+  - the reason why this is described as a sidecar is just because the purpose of it was to use it as a sidecar in a POD of different services
 
 **NOTE:** Do not even expect that it will work out of the box!
 
